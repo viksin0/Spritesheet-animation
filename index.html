@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprite Sheet Animation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Sprite Sheet Animation Demo</h1>
+    
+    <div class="sprite-display" id="spriteDisplay"></div>
+    <div class="animation-container">
+
+        
+        
+        <div class="controls">
+            <select id="animationSelect">
+                <option value="idle">Idle</option>
+                <option value="run">Run</option>
+                <option value="walk">Walk</option>
+                <option value="jump">Jump</option>
+                <option value="attack1">Attack 1</option>
+                <option value="attack2">Attack 2</option>
+                <option value="attack3">Attack 3</option>
+                <option value="hurt">Hurt</option>
+                <option value="dead">Dead</option>
+                <option value="shield">Shield</option>
+            </select>
+            <button id="playBtn">Play Animation</button>
+            <button id="stopBtn" class="stop-btn">Stop</button>
+        </div>
+
+        <div class="speed-control">
+            <label for="speedSlider">Animation Speed:</label>
+            <input type="range" id="speedSlider" min="50" max="500" value="150">
+            <span id="speedValue">150ms</span>
+        </div>
+
+        <div class="info">
+            <div>Current Animation: <span id="currentAnimation">idle</span></div>
+            <div>Frame: <span id="currentFrame">1</span> / <span id="totalFrames">6</span></div>
+        </div>
+    </div>
+
+    <script>
+        class SpriteAnimation {
+            constructor() {
+                this.spriteDisplay = document.getElementById('spriteDisplay');
+                this.playBtn = document.getElementById('playBtn');
+                this.stopBtn = document.getElementById('stopBtn');
+                this.animationSelect = document.getElementById('animationSelect');
+                this.speedSlider = document.getElementById('speedSlider');
+                this.speedValue = document.getElementById('speedValue');
+                this.currentAnimationSpan = document.getElementById('currentAnimation');
+                this.currentFrameSpan = document.getElementById('currentFrame');
+                this.totalFramesSpan = document.getElementById('totalFrames');
+
+                this.isPlaying = false;
+                this.currentFrame = 0;
+                this.animationInterval = null;
+                this.frameWidth = 128;
+                this.frameHeight = 130;
+
+                // Define animation data based on the spritesheet
+                this.animations = {
+                    idle: { frames: 6, row: 2, width: 128 },
+                    run: { frames: 8, row: 4, width: 128 },
+                    walk: { frames: 8, row: 5, width: 128 },
+                    jump: { frames: 12, row: 3, width: 128 },
+                    attack1: { frames: 6, row: 0, width: 128 },
+                    attack2: { frames: 4, row: 0, width: 128, startX: 768 },
+                    attack3: { frames: 3, row: 1, width: 128 },
+                    hurt: { frames: 2, row: 1, width: 128, startX: 384 },
+                    dead: { frames: 3, row: 1, width: 128, startX: 384 },
+                    shield: { frames: 2, row: 1, width: 128, startX: 1024 }
+                };
+
+                this.initEventListeners();
+                this.updateDisplay();
+            }
+
+            initEventListeners() {
+                this.playBtn.addEventListener('click', () => this.toggleAnimation());
+                this.stopBtn.addEventListener('click', () => this.stopAnimation());
+                this.animationSelect.addEventListener('change', () => this.changeAnimation());
+                this.speedSlider.addEventListener('input', () => this.updateSpeed());
+            }
+
+            toggleAnimation() {
+                if (this.isPlaying) {
+                    this.pauseAnimation();
+                } else {
+                    this.playAnimation();
+                }
+            }
+
+            playAnimation() {
+                if (this.isPlaying) return;
+
+                this.isPlaying = true;
+                this.playBtn.textContent = 'Pause';
+                this.playBtn.style.backgroundColor = '#ff9800';
+
+                const speed = parseInt(this.speedSlider.value);
+                this.animationInterval = setInterval(() => {
+                    this.nextFrame();
+                }, speed);
+            }
+
+            pauseAnimation() {
+                this.isPlaying = false;
+                this.playBtn.textContent = 'Play Animation';
+                this.playBtn.style.backgroundColor = '#4CAF50';
+                
+                if (this.animationInterval) {
+                    clearInterval(this.animationInterval);
+                    this.animationInterval = null;
+                }
+            }
+
+            stopAnimation() {
+                this.pauseAnimation();
+                this.currentFrame = 0;
+                this.updateDisplay();
+            }
+
+            changeAnimation() {
+                this.stopAnimation();
+                this.currentFrame = 0;
+                this.updateDisplay();
+            }
+
+            nextFrame() {
+                const currentAnim = this.animations[this.animationSelect.value];
+                this.currentFrame = (this.currentFrame + 1) % currentAnim.frames;
+                this.updateDisplay();
+            }
+
+            updateDisplay() {
+                const animKey = this.animationSelect.value;
+                const anim = this.animations[animKey];
+                
+                // Calculate background position
+                const frameX = (anim.startX || 0) + (this.currentFrame * this.frameWidth);
+                const frameY = anim.row * this.frameHeight;
+                
+                this.spriteDisplay.style.backgroundPosition = `-${frameX}px -${frameY}px`;
+                
+                // Update info display
+                this.currentAnimationSpan.textContent = animKey;
+                this.currentFrameSpan.textContent = this.currentFrame + 1;
+                this.totalFramesSpan.textContent = anim.frames;
+            }
+
+            updateSpeed() {
+                const speed = parseInt(this.speedSlider.value);
+                this.speedValue.textContent = speed + 'ms';
+                
+                // If animation is playing, restart with new speed
+                if (this.isPlaying) {
+                    this.pauseAnimation();
+                    this.playAnimation();
+                }
+            }
+        }
+
+        // Initialize the animation when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new SpriteAnimation();
+        });
+    </script>
+</body>
+</html>
