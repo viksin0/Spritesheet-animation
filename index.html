@@ -46,15 +46,7 @@
     <script>
         class SpriteAnimation {
             constructor() {
-                this.spriteDisplay = document.getElementById('spriteDisplay');
-                this.playBtn = document.getElementById('playBtn');
-                this.stopBtn = document.getElementById('stopBtn');
-                this.animationSelect = document.getElementById('animationSelect');
-                this.speedSlider = document.getElementById('speedSlider');
-                this.speedValue = document.getElementById('speedValue');
-                this.currentAnimationSpan = document.getElementById('currentAnimation');
-                this.currentFrameSpan = document.getElementById('currentFrame');
-                this.totalFramesSpan = document.getElementById('totalFrames');
+                this.initDOMElements();
 
                 this.isPlaying = false;
                 this.currentFrame = 0;
@@ -80,6 +72,24 @@
                 this.updateDisplay();
             }
 
+            initDOMElements() {
+                const elements = {
+                    spriteDisplay: 'spriteDisplay',
+                    playBtn: 'playBtn',
+                    stopBtn: 'stopBtn',
+                    animationSelect: 'animationSelect',
+                    speedSlider: 'speedSlider',
+                    speedValue: 'speedValue',
+                    currentAnimationSpan: 'currentAnimation',
+                    currentFrameSpan: 'currentFrame',
+                    totalFramesSpan: 'totalFrames'
+                };
+
+                Object.keys(elements).forEach(key => {
+                    this[key] = document.getElementById(elements[key]);
+                });
+            }
+
             initEventListeners() {
                 this.playBtn.addEventListener('click', () => this.toggleAnimation());
                 this.stopBtn.addEventListener('click', () => this.stopAnimation());
@@ -99,19 +109,16 @@
                 if (this.isPlaying) return;
 
                 this.isPlaying = true;
-                this.playBtn.textContent = 'Pause';
-                this.playBtn.style.backgroundColor = '#ff9800';
+                this.updatePlayButtonState();
 
-                const speed = parseInt(this.speedSlider.value);
                 this.animationInterval = setInterval(() => {
                     this.nextFrame();
-                }, speed);
+                }, this.getAnimationSpeed());
             }
 
             pauseAnimation() {
                 this.isPlaying = false;
-                this.playBtn.textContent = 'Play Animation';
-                this.playBtn.style.backgroundColor = '#4CAF50';
+                this.updatePlayButtonState();
                 
                 if (this.animationInterval) {
                     clearInterval(this.animationInterval);
@@ -119,14 +126,30 @@
                 }
             }
 
+            updatePlayButtonState() {
+                if (this.isPlaying) {
+                    this.playBtn.textContent = 'Pause';
+                    this.playBtn.style.backgroundColor = '#ff9800';
+                } else {
+                    this.playBtn.textContent = 'Play Animation';
+                    this.playBtn.style.backgroundColor = '#4CAF50';
+                }
+            }
+
+            getAnimationSpeed() {
+                return parseInt(this.speedSlider.value);
+            }
+
             stopAnimation() {
                 this.pauseAnimation();
-                this.currentFrame = 0;
-                this.updateDisplay();
+                this.resetFrame();
             }
 
             changeAnimation() {
                 this.stopAnimation();
+            }
+
+            resetFrame() {
                 this.currentFrame = 0;
                 this.updateDisplay();
             }
@@ -154,14 +177,18 @@
             }
 
             updateSpeed() {
-                const speed = parseInt(this.speedSlider.value);
+                const speed = this.getAnimationSpeed();
                 this.speedValue.textContent = speed + 'ms';
                 
                 // If animation is playing, restart with new speed
                 if (this.isPlaying) {
-                    this.pauseAnimation();
-                    this.playAnimation();
+                    this.restartAnimation();
                 }
+            }
+
+            restartAnimation() {
+                this.pauseAnimation();
+                this.playAnimation();
             }
         }
 
