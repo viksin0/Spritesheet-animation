@@ -85,9 +85,9 @@
                     totalFramesSpan: 'totalFrames'
                 };
 
-                Object.keys(elements).forEach(key => {
-                    this[key] = document.getElementById(elements[key]);
-                });
+                for (const [property, id] of Object.entries(elements)) {
+                    this[property] = document.getElementById(id);
+                }
             }
 
             initEventListeners() {
