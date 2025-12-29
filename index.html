@@ -93,7 +93,7 @@
             initEventListeners() {
                 this.playBtn.addEventListener('click', () => this.toggleAnimation());
                 this.stopBtn.addEventListener('click', () => this.stopAnimation());
-                this.animationSelect.addEventListener('change', () => this.changeAnimation());
+                this.animationSelect.addEventListener('change', () => this.stopAnimation());
                 this.speedSlider.addEventListener('input', () => this.updateSpeed());
             }
 
@@ -143,10 +143,6 @@
             stopAnimation() {
                 this.pauseAnimation();
                 this.resetFrame();
-            }
-
-            changeAnimation() {
-                this.stopAnimation();
             }
 
             resetFrame() {
